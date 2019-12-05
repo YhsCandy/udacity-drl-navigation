@@ -78,7 +78,16 @@ class DuelingQNetwork(nn.Module):
         return x
 
 class NoisyLinear(nn.Module):
+    """Noisy linear layer"""
+
     def __init__(self, in_features, out_features, std_init=0.5):
+        """Initialize parameters - almost same as nn.Linear.
+        Params
+        ======
+            in_features (int): Input features
+            out_features (int): Output features
+            std_init (float): Standard deviation
+        """
         super(NoisyLinear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
