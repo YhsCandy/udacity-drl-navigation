@@ -16,6 +16,9 @@ if __name__ == '__main__':
                         default='checkpoint.pth')
     parser.add_argument('--type', type=str, help='NN type - NoisyDueling, Dueling or Q',
                         default='NoisyDueling')
+    parser.add_argument('--cuda', dest='cuda', action='store_true')
+    parser.add_argument('--no_cuda', dest='cuda', action='store_false')
+    parser.set_defaults(feature=True)
 
     print('Testing')
     args = parser.parse_args()

@@ -88,6 +88,9 @@ if __name__ == '__main__':
                         default=0.001)
     parser.add_argument('--update_every', type=int, help='Update every n frames',
                         default=4)
+    parser.add_argument('--cuda', dest='cuda', action='store_true')
+    parser.add_argument('--no_cuda', dest='cuda', action='store_false')
+    parser.set_defaults(feature=True)
 
     print('Training')
     args = parser.parse_args()
@@ -117,6 +120,6 @@ if __name__ == '__main__':
     plt.plot(np.arange(len(scores)), scores)
     plt.ylabel('Score')
     plt.xlabel('Episode #')
-    plt.show()
+    plt.savefig(args.model + '.png')
 
     env.close()

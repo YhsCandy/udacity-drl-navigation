@@ -8,7 +8,6 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent():
     """Interacts with and learns from the environment."""
@@ -33,6 +32,11 @@ class Agent():
         self._sample_noise = False
         self._update_buffer_priorities = False
 
+        if args.cuda:
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = "cpu"
+
         # NN
         if training:
             self.batch_size = args.batch_size
@@ -40,32 +44,32 @@ class Agent():
             self.tau = args.tau
             self.update_every = args.update_every
 
-            self.qnetwork_local = self._create_nn(nn_type, state_size, action_size, self.seed)
-            self.qnetwork_target = self._create_nn(nn_type, state_size, action_size, self.seed)
+            self.qnetwork_local = self._create_nn(nn_type, state_size, action_size, self.seed, self.device)
+            self.qnetwork_target = self._create_nn(nn_type, state_size, action_size, self.seed, self.device)
 
             self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=args.learning_rate)
 
             # Replay memory
             self.memory = self._create_buffer(args.buffer.lower(), action_size, args.buffer_size,
-                                              self.batch_size, self.seed)
+                                              self.batch_size, self.seed, self.device)
             # Initialize time step (for updating every UPDATE_EVERY steps)
             self.t_step = 0
         else:
-            self.qnetwork_local = self._create_nn(nn_type, state_size, action_size, self.seed)
+            self.qnetwork_local = self._create_nn(nn_type, state_size, action_size, self.seed, self.device)
 
-    def _create_buffer(self, buffer_type, action_size, buffer_size, batch_size, seed):
+    def _create_buffer(self, buffer_type, action_size, buffer_size, batch_size, seed, device):
         if buffer_type == 'prioritized':
             self._update_buffer_priorities = True
-            return PrioritizedReplayBuffer(action_size, buffer_size, batch_size, seed)
+            return PrioritizedReplayBuffer(action_size, buffer_size, batch_size, seed, device=device)
         elif buffer_type == 'sample':
-            return ReplayBuffer(action_size, buffer_size, batch_size, seed)
+            return ReplayBuffer(action_size, buffer_size, batch_size, seed, device=device)
         else:
             raise Exception('Unknown buffer type - must be one of prioritized or sample')
 
-    def _create_nn(self, nn_type, state_size, action_size, seed):
+    def _create_nn(self, nn_type, state_size, action_size, seed, device):
         if nn_type == 'noisydueling':
             self._sample_noise = True
-            return NoisyDuelingQNetwork(state_size, action_size, seed).to(device)
+            return NoisyDuelingQNetwork(state_size, action_size, seed, device=device).to(device)
         elif nn_type == 'dueling':
             return DuelingQNetwork(state_size, action_size, seed).to(device)
         elif nn_type == 'q':
@@ -93,7 +97,7 @@ class Agent():
             state (array_like): current state
             eps (float): epsilon, for epsilon-greedy action selection
         """
-        state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        state = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
         self.qnetwork_local.eval()
         with torch.no_grad():
             if self._sample_noise:

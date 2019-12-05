@@ -80,7 +80,7 @@ class DuelingQNetwork(nn.Module):
 class NoisyLinear(nn.Module):
     """Noisy linear layer"""
 
-    def __init__(self, in_features, out_features, std_init=0.5):
+    def __init__(self, in_features, out_features, std_init=0.5, device="cpu"):
         """Initialize parameters - almost same as nn.Linear.
         Params
         ======
@@ -99,8 +99,8 @@ class NoisyLinear(nn.Module):
         self.bias_mu = nn.Parameter(torch.empty(out_features))
         self.bias_sigma = nn.Parameter(torch.empty(out_features))
 
-        self.weight_epsilon = torch.empty(out_features, in_features)
-        self.bias_epsilon = torch.empty(out_features)
+        self.weight_epsilon = torch.empty(out_features, in_features).to(device)
+        self.bias_epsilon = torch.empty(out_features).to(device)
 
         self.reset_parameters()
         self.sample_noise()
@@ -132,7 +132,7 @@ class NoisyLinear(nn.Module):
 class NoisyDuelingQNetwork(nn.Module):
     """Dueling Model."""
 
-    def __init__(self, state_size, action_size, seed):
+    def __init__(self, state_size, action_size, seed, device="cpu"):
         """Initialize parameters and build model.
         Params
         ======
@@ -153,11 +153,11 @@ class NoisyDuelingQNetwork(nn.Module):
         self.fc2 = nn.Linear(fc1_units, fc2_units)
         self.fc3 = nn.Linear(fc2_units, fc3_units)
 
-        self.fc1_adv = NoisyLinear(fc3_units, fc4_units)
-        self.fc2_adv = NoisyLinear(fc4_units, action_size)
+        self.fc1_adv = NoisyLinear(fc3_units, fc4_units, device=device)
+        self.fc2_adv = NoisyLinear(fc4_units, action_size, device=device)
 
-        self.fc1_val = NoisyLinear(fc3_units, fc4_units)
-        self.fc2_val = NoisyLinear(fc4_units, 1)
+        self.fc1_val = NoisyLinear(fc3_units, fc4_units, device=device)
+        self.fc2_val = NoisyLinear(fc4_units, 1, device=device)
 
 
     def forward(self, state):
