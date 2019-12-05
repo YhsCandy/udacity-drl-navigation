@@ -84,6 +84,10 @@ if __name__ == '__main__':
                         default=0.99)
     parser.add_argument('--tau', type=float, help='For soft update of target parameters',
                         default=0.01)
+    parser.add_argument('--alpha', type=float, help='Prioritized buffer - How much prioritization is used (0 - no prioritization, 1 - full prioritization)',
+                        default=0.5)
+    parser.add_argument('--beta', type=float, help='Prioritized buffer - To what degree to use importance weights (0 - no corrections, 1 - full correction)',
+                    default=0.5)
     parser.add_argument('--learning_rate', type=float, help='Learning rate',
                         default=0.001)
     parser.add_argument('--update_every', type=int, help='Update every n frames',

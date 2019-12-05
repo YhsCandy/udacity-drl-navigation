@@ -57,7 +57,7 @@ class ReplayBuffer(object):
 class PrioritizedReplayBuffer(ReplayBuffer):
     """Fixed-size prioritized buffer to store experience tuples."""
 
-    def __init__(self, action_size, buffer_size, batch_size, seed, alpha=0.6, device="cpu"):
+    def __init__(self, action_size, buffer_size, batch_size, seed, alpha=0.6, beta=0.5, device="cpu"):
         """Initialize a PrioritizedReplayBuffer object.
 
         Params
@@ -67,10 +67,12 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             batch_size (int): size of each training batch
             seed (int): random seed
             alpha (float): how much prioritization is used (0 - no prioritization, 1 - full prioritization)
+            beta (float): To what degree to use importance weights (0 - no corrections, 1 - full correction)
         """
         super(PrioritizedReplayBuffer, self).__init__(action_size, buffer_size, batch_size, seed, device=device)
 
         self.alpha = alpha
+        self.beta = beta
 
         it_capacity = 1
         while it_capacity < buffer_size:
@@ -98,22 +100,16 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             res.append(idx)
         return res
 
-    def sample(self, beta=0.6):
-        """Randomly sample a batch of experiences from memory.
-
-            beta: float
-            To what degree to use importance weights
-            (0 - no corrections, 1 - full correction)
-        """
+    def sample(self):
         idxes = self._sample_proportional()
 
         weights = []
         p_min = self._it_min.min() / self._it_sum.sum()
-        max_weight = (p_min * len(self.memory)) ** (-beta)
+        max_weight = (p_min * len(self.memory)) ** (-self.beta)
 
         for idx in idxes:
             p_sample = self._it_sum[idx] / self._it_sum.sum()
-            weight = (p_sample * len(self.memory)) ** (-beta)
+            weight = (p_sample * len(self.memory)) ** (-self.beta)
             weights.append(weight / max_weight)
 
         weights = torch.tensor(weights, device=self.device, dtype=torch.float)

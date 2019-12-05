@@ -51,16 +51,16 @@ class Agent():
 
             # Replay memory
             self.memory = self._create_buffer(args.buffer.lower(), action_size, args.buffer_size,
-                                              self.batch_size, self.seed, self.device)
+                                              self.batch_size, args.alpha, args.beta, self.seed, self.device)
             # Initialize time step (for updating every UPDATE_EVERY steps)
             self.t_step = 0
         else:
             self.qnetwork_local = self._create_nn(nn_type, state_size, action_size, self.seed, self.device)
 
-    def _create_buffer(self, buffer_type, action_size, buffer_size, batch_size, seed, device):
+    def _create_buffer(self, buffer_type, action_size, buffer_size, batch_size, alpha, beta, seed, device):
         if buffer_type == 'prioritized':
             self._update_buffer_priorities = True
-            return PrioritizedReplayBuffer(action_size, buffer_size, batch_size, seed, device=device)
+            return PrioritizedReplayBuffer(action_size, buffer_size, batch_size, seed, alpha=alpha, beta=beta, device=device)
         elif buffer_type == 'sample':
             return ReplayBuffer(action_size, buffer_size, batch_size, seed, device=device)
         else:
