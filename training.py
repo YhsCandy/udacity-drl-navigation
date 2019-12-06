@@ -94,7 +94,7 @@ if __name__ == '__main__':
                         default=4)
     parser.add_argument('--cuda', dest='cuda', action='store_true')
     parser.add_argument('--no_cuda', dest='cuda', action='store_false')
-    parser.set_defaults(feature=True)
+    parser.set_defaults(cuda=True)
 
     print('Training')
     args = parser.parse_args()
