@@ -73,6 +73,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
         self.alpha = alpha
         self.beta = beta
+        self._eps = 0.00000001
 
         it_capacity = 1
         while it_capacity < buffer_size:
@@ -105,11 +106,11 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
         weights = []
         p_min = self._it_min.min() / self._it_sum.sum()
-        max_weight = (p_min * len(self.memory)) ** (-self.beta)
+        max_weight = (p_min * len(self.memory) + self._eps) ** (-self.beta)
 
         for idx in idxes:
             p_sample = self._it_sum[idx] / self._it_sum.sum()
-            weight = (p_sample * len(self.memory)) ** (-self.beta)
+            weight = (p_sample * len(self.memory) + self._eps) ** (-self.beta)
             weights.append(weight / max_weight)
 
         weights = torch.tensor(weights, device=self.device, dtype=torch.float)
