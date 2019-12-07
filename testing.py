@@ -40,7 +40,7 @@ if __name__ == '__main__':
                   training=False, args=args)
 
     # load nn
-    agent.qnetwork_local.load_state_dict(torch.load(args.model))
+    agent.qnetwork_local.load_state_dict(torch.load(args.model, map_location=lambda storage, loc: storage))
 
     state = env_info.vector_observations[0]            # get the current state
     score = 0                                          # initialize the score
