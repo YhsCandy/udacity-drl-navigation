@@ -30,6 +30,12 @@ virtualenv --python /usr/bin/python3 .venv
 . .venv/bin/activate
 ``` 
 
+Version that works well on MacOSX:
+```bash
+virtualenv -p python3 .venv
+. .venv/bin/activate
+```
+
 Install dependencies:
 ```bash
 pip install -r requirements.txt
